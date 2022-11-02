@@ -89,3 +89,58 @@ class AddStockView(APIView):
             return Response(serializer.data)
         # return a meaningful error response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class AddStockView(APIView):
+
+    def patch(self, request, pk, stock):
+        # if no model exists by this PK, raise a 404 error
+        model = get_object_or_404(Book, pk=pk)
+        # this is the only field we want to update
+        stock_count = model.stock_count + int(stock)
+        if stock_count== 0:
+            stock_status= "Out of stock"
+        elif stock_count > 0 and stock_count<=5:
+            stock_status = "Critical"
+        elif stock_count > 5 and stock_count<=10:
+            stock_status = "Bad"
+        elif stock_count > 10:
+            stock_status = "Good"
+
+
+        data = {"stock_count":stock_count, "stock_status":stock_status}
+        serializer = BookSerializer(model, data=data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        # return a meaningful error response
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class RemoveStockView(APIView):
+
+    def patch(self, request, pk, stock):
+        # if no model exists by this PK, raise a 404 error
+        model = get_object_or_404(Book, pk=pk)
+        # this is the only field we want to update
+        stock_count = model.stock_count - int(stock)
+        
+        if stock_count== 0:
+            stock_status= "Out of stock"
+        elif stock_count > 0 and stock_count<=5:
+            stock_status = "Critical"
+        elif stock_count > 5 and stock_count<=10:
+            stock_status = "Bad"
+        elif stock_count > 10:
+            stock_status = "Good"
+        elif stock_count < 0:
+            stock_status= "Out of stock"
+            stock_count = 0
+
+
+        data = {"stock_count":stock_count, "stock_status":stock_status}
+        serializer = BookSerializer(model, data=data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        # return a meaningful error response
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
