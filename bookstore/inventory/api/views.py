@@ -1,7 +1,7 @@
 from socketserver import UDPServer
 from rest_framework import generics, status
 from ..models import Author, Book
-from .serializers import BookSerializer, AuthorSerializer
+from .serializers import BookSerializer, BookCreateSerializer, AuthorSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -38,13 +38,12 @@ class AuthorDetailView(generics.RetrieveAPIView):
     serializer_class = AuthorSerializer
 
 class AddBookView(generics.CreateAPIView):
-    serializer_class = BookSerializer
+    serializer_class = BookCreateSerializer
     def post(self, request, *args, **kwargs):
         serializer = BookSerializer(
             data=request.data
         )
         
-        print( serializer.initial_data)
         stock_count = int(serializer.initial_data['stock_count'])
         if stock_count== 0:
             serializer.initial_data['stock_status'] = "Out of stock"
@@ -55,10 +54,9 @@ class AddBookView(generics.CreateAPIView):
         elif stock_count > 10:
             serializer.initial_data['stock_status'] = "Good"
 
-        print(serializer)
         if serializer.is_valid():  # will call the validate function
             serializer.save()
-            return Response({'success': True})
+            return Response(serializer.data)
         else:
             return Response(
                 serializer.errors,

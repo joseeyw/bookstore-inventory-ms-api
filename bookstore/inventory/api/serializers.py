@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from ..models import Book,Author
 
+class BookCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Book
+        fields = '__all__'
+        read_only_fields = ('stock_status',)
+        
 class BookSerializer(serializers.ModelSerializer):
     class Meta:
         model = Book
