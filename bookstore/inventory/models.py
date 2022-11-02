@@ -19,3 +19,7 @@ class Book(models.Model):
     
     def __str__(self):
         return self.title
+
+class StockHistory(models.Model):
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)
+    record = models.TextField()
