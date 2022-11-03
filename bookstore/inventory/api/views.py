@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.views.generic.edit import UpdateView
+from rest_framework.permissions import IsAuthenticated
 
 class BooksListView(generics.ListAPIView):
     queryset = Book.objects.all()
@@ -32,7 +33,7 @@ class AddAuthorView(generics.CreateAPIView):
         serializer = AuthorSerializer(data = request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"succcess":True})
+            return Response({"succcess":True}, status.HTTP_201_CREATED)
         else:
             return Response(
                 serializer.errors,
