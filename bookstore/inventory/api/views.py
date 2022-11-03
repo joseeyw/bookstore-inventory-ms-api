@@ -31,6 +31,7 @@ class BookDetailView(generics.RetrieveAPIView):
 class AddAuthorView(generics.CreateAPIView):
     serializer_class = AuthorSerializer
     authentication_classes = [TokenAuthentication]
+    permission_classes = (IsAuthenticated,)
     def post(self, request, *args, **kwargs):
         serializer = AuthorSerializer(data = request.data)
         if serializer.is_valid():
@@ -54,7 +55,7 @@ class AuthorDetailView(generics.RetrieveAPIView):
 class AddBookView(generics.CreateAPIView):
     serializer_class = BookCreateSerializer
     authentication_classes = [TokenAuthentication]
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     def post(self, request, *args, **kwargs):
         serializer = BookSerializer(
             data=request.data
@@ -81,6 +82,7 @@ class AddBookView(generics.CreateAPIView):
 
 class AddStockView(APIView):
     authentication_classes = [TokenAuthentication]
+    permission_classes = (IsAuthenticated,)
     def patch(self, request, pk, stock):
         # if no model exists by this PK, raise a 404 error
         book = get_object_or_404(Book, pk=pk)
@@ -110,6 +112,7 @@ class AddStockView(APIView):
 
 class RemoveStockView(APIView):
     authentication_classes = [TokenAuthentication]
+    permission_classes = (IsAuthenticated,)
     def patch(self, request, pk, stock):
         # if no model exists by this PK, raise a 404 error
         book = get_object_or_404(Book, pk=pk)
