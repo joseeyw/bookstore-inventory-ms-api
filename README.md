@@ -23,6 +23,8 @@ ALTER ROLE bookstore WITH LOGIN;
 ```
 ALTER ROLE bookstore WITH CREATEDB;
 ```
+
+
 ### 2. Installing Dependencies
 ```diff 
 
@@ -41,6 +43,11 @@ pip install -r requirements.txt
 ## Running the project
 ```
 cd bookstore
+```
+
+#### configurations
+```
+cp bookstore/.env.example  bookstore/.env
 ```
 ### 1. setting up migrations
 ```
