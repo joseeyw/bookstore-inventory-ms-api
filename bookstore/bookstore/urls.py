@@ -21,6 +21,7 @@ from rest_framework.schemas import get_schema_view
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include('inventory.api.urls', namespace='api')),
+    path('api/auth/', include('auth.api.urls', namespace='auth_api')),
     path('swagger-ui/', TemplateView.as_view(
         template_name='swagger-ui.html',
         extra_context={'schema_url':'openapi-schema'}
