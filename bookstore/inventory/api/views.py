@@ -1,7 +1,8 @@
+from datetime import datetime
 from socketserver import UDPServer
 from rest_framework import generics, status
-from ..models import Author, Book
-from .serializers import BookSerializer, BookCreateSerializer, AuthorSerializer
+from ..models import Author, Book, StockHistory
+from .serializers import BookSerializer, BookCreateSerializer, AuthorSerializer, StockHistorySerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -62,13 +63,16 @@ class AddBookView(generics.CreateAPIView):
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
+
 class AddStockView(APIView):
 
     def patch(self, request, pk, stock):
         # if no model exists by this PK, raise a 404 error
-        model = get_object_or_404(Book, pk=pk)
+        book = get_object_or_404(Book, pk=pk)
         # this is the only field we want to update
-        stock_count = model.stock_count + int(stock)
+        stock_count = book.stock_count + int(stock)
+        timestamp = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+        record = f"Added {stock} items at {timestamp}. New Stock Records {stock_count}"
         if stock_count== 0:
             stock_status= "Out of stock"
         elif stock_count > 0 and stock_count<=5:
@@ -80,35 +84,11 @@ class AddStockView(APIView):
 
 
         data = {"stock_count":stock_count, "stock_status":stock_status}
-        serializer = BookSerializer(model, data=data, partial=True)
+        serializer = BookSerializer(book, data=data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
-        # return a meaningful error response
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-class AddStockView(APIView):
-
-    def patch(self, request, pk, stock):
-        # if no model exists by this PK, raise a 404 error
-        model = get_object_or_404(Book, pk=pk)
-        # this is the only field we want to update
-        stock_count = model.stock_count + int(stock)
-        if stock_count== 0:
-            stock_status= "Out of stock"
-        elif stock_count > 0 and stock_count<=5:
-            stock_status = "Critical"
-        elif stock_count > 5 and stock_count<=10:
-            stock_status = "Bad"
-        elif stock_count > 10:
-            stock_status = "Good"
-
-
-        data = {"stock_count":stock_count, "stock_status":stock_status}
-        serializer = BookSerializer(model, data=data, partial=True)
-
-        if serializer.is_valid():
-            serializer.save()
+            StockHistory.objects.create(book=book, record=record)
             return Response(serializer.data)
         # return a meaningful error response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -117,10 +97,11 @@ class RemoveStockView(APIView):
 
     def patch(self, request, pk, stock):
         # if no model exists by this PK, raise a 404 error
-        model = get_object_or_404(Book, pk=pk)
+        book = get_object_or_404(Book, pk=pk)
         # this is the only field we want to update
-        stock_count = model.stock_count - int(stock)
-        
+        stock_count = book.stock_count - int(stock)
+        timestamp = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+        record = f"Removed {stock} items at {timestamp}. New Stock Records {stock_count}"
         if stock_count== 0:
             stock_status= "Out of stock"
         elif stock_count > 0 and stock_count<=5:
@@ -131,14 +112,37 @@ class RemoveStockView(APIView):
             stock_status = "Good"
         elif stock_count < 0:
             stock_status= "Out of stock"
+            timestamp = datetime.now().strftime("%d/%m/%Y, %H:%M:%S")
+            record = f" Tried Removed {stock} items at {timestamp} .The available stock is less. Stock Records {stock_count}"
             stock_count = 0
 
 
         data = {"stock_count":stock_count, "stock_status":stock_status}
-        serializer = BookSerializer(model, data=data, partial=True)
+        serializer = BookSerializer(book, data=data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
+            #Update the stock history table
+            StockHistory.objects.create(book=book, record=record)
             return Response(serializer.data)
         # return a meaningful error response
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StockHistoryListView(generics.ListAPIView):
+    queryset = StockHistory.objects.all()
+    serializer_class = StockHistorySerializer
+
+class StockHistoryDetailView(generics.RetrieveAPIView):
+    queryset = StockHistory.objects.all()
+    serializer_class = StockHistorySerializer   
+
+class StockHistoryPerBook(generics.ListAPIView):
+    serializer_class = StockHistorySerializer 
+    def get_queryset(self):
+        return StockHistory.objects.filter(book=self.kwargs['book_id']).all()
+        # return a meaningful error response
+
+    
+        
+
