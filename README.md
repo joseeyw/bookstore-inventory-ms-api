@@ -61,6 +61,10 @@ python3 manage.py migrate
 python3 manage.py runserver
 ```
 #### Access the API documentation on 
+##### For the authenticated apis add authorization in format
+```
+Token tokengeneratedfromlogin
+```
 ```
 http://localhost:8000/swagger
 ```
