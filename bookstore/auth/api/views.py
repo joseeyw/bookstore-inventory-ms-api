@@ -6,6 +6,8 @@ from django.contrib.auth import login
 from rest_framework.authtoken.serializers import AuthTokenSerializer
 from knox.views import LogoutView as KnoxLogoutView, LoginView as KnoxLoginView
 from knox import views as knox_views
+from knox.auth import TokenAuthentication
+
 
 # Register API
 class RegisterView(generics.GenericAPIView):
@@ -30,5 +32,3 @@ class LoginView(generics.GenericAPIView, KnoxLoginView):
         user = serializer.validated_data['user']
         login(request, user)
         return super(LoginView, self).post(request, format=None)
-class LogoutView(KnoxLogoutView):
-    pass

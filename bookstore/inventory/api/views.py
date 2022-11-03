@@ -8,6 +8,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.views.generic.edit import UpdateView
 from rest_framework.permissions import IsAuthenticated
+from knox.auth import TokenAuthentication
 
 class BooksListView(generics.ListAPIView):
     queryset = Book.objects.all()
@@ -29,6 +30,7 @@ class BookDetailView(generics.RetrieveAPIView):
 
 class AddAuthorView(generics.CreateAPIView):
     serializer_class = AuthorSerializer
+    authentication_classes = [TokenAuthentication]
     def post(self, request, *args, **kwargs):
         serializer = AuthorSerializer(data = request.data)
         if serializer.is_valid():
@@ -51,6 +53,8 @@ class AuthorDetailView(generics.RetrieveAPIView):
 
 class AddBookView(generics.CreateAPIView):
     serializer_class = BookCreateSerializer
+    authentication_classes = [TokenAuthentication]
+    # permission_classes = (IsAuthenticated,)
     def post(self, request, *args, **kwargs):
         serializer = BookSerializer(
             data=request.data
@@ -76,7 +80,7 @@ class AddBookView(generics.CreateAPIView):
             )
 
 class AddStockView(APIView):
-
+    authentication_classes = [TokenAuthentication]
     def patch(self, request, pk, stock):
         # if no model exists by this PK, raise a 404 error
         book = get_object_or_404(Book, pk=pk)
@@ -105,7 +109,7 @@ class AddStockView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class RemoveStockView(APIView):
-
+    authentication_classes = [TokenAuthentication]
     def patch(self, request, pk, stock):
         # if no model exists by this PK, raise a 404 error
         book = get_object_or_404(Book, pk=pk)

@@ -15,6 +15,8 @@ env = environ.Env()
 environ.Env.read_env()
 
 from pathlib import Path
+from datetime import timedelta
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -45,6 +47,7 @@ INSTALLED_APPS = [
     'auth.apps.AuthConfig',
     'rest_framework',
     'rest_framework_swagger',
+    # 'rest_framework.authtoken',
     'knox',
     'drf_yasg',
 
@@ -146,18 +149,28 @@ SWAGGER_SETTINGS = {
             'name': 'Authorization',
             'in': 'header'
       },
-    'USE_SESSION_AUTH': False,
-    'JSON_EDITOR': True,
    }
 }
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
         'knox.auth.TokenAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
+         'rest_framework.permissions.AllowAny',
     ],
 }
 
+
+REST_KNOX = {
+  'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
+  'AUTH_TOKEN_CHARACTER_LENGTH': 64,
+  'TOKEN_TTL': timedelta(hours=10),  # default time 10h
+  'USER_SERIALIZER': 'knox.serializers.UserSerializer',
+  'TOKEN_LIMIT_PER_USER': None,
+  'AUTO_REFRESH': False,
+  
+}
+WSGIPassAuthorization=True
