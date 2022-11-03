@@ -2,10 +2,11 @@ import json
 from django.test import TestCase, Client
 from datetime import datetime
 from django.urls import reverse
-
+from django.contrib.auth.models import User
 from inventory.models import Author, Book
 
 # Create your tests here.
+
 class AuthorTestCase(TestCase):
     def setUp(self):
         # create Author
@@ -16,14 +17,26 @@ class AuthorTestCase(TestCase):
         self.date_of_wrong_format_birth = '18/09/19'
         self.date_of_birth ="2018-09-10"
 
+        self.username = "test"
+        self.password = "string"
+
+        User.objects.create_user(username=self.username, email=self.email, password=self.password)
+        response = self.client.post(reverse('auth:login'), {"username": self.username, "password": self.password})
+        
+        self.token = response.json()['token']
+
+        self.headers={'HTTP_AUTHORIZATION':f'Token {self.token}'}
+        
+
+
     def test_sucess_author_creation(self):
-        response = self.client.post(reverse('inventory:author_add'),  {"first_name": self.first_name, "last_name": self.last_name, "email": self.email, "date_of_birth":self.date_of_birth })
+        response = self.client.post(reverse('inventory:author_add'),  {"first_name": self.first_name, "last_name": self.last_name, "email": self.email, "date_of_birth":self.date_of_birth }, **self.headers)
         
         self.assertEqual(response.status_code, 201)
 
     def test_fail_author_creation_wrong_format(self):
     
-        response = self.client.post(reverse('inventory:author_add'),  {"first_name": self.first_name, "last_name": self.last_name, "email": self.email, "date_of_birth":self.date_of_wrong_format_birth })
+        response = self.client.post(reverse('inventory:author_add'),  {"first_name": self.first_name, "last_name": self.last_name, "email": self.email, "date_of_birth":self.date_of_wrong_format_birth }, **self.headers)
        
         self.assertEqual(response.status_code, 400)
         
