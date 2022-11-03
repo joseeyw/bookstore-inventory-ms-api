@@ -18,13 +18,13 @@ class AuthorTestCase(TestCase):
 
     def test_sucess_author_creation(self):
         response = self.client.post(reverse('inventory:author_add'),  {"first_name": self.first_name, "last_name": self.last_name, "email": self.email, "date_of_birth":self.date_of_birth })
-        print(response.json())
+        
         self.assertEqual(response.status_code, 201)
 
     def test_fail_author_creation_wrong_format(self):
     
         response = self.client.post(reverse('inventory:author_add'),  {"first_name": self.first_name, "last_name": self.last_name, "email": self.email, "date_of_birth":self.date_of_wrong_format_birth })
-        print(response.json())
+       
         self.assertEqual(response.status_code, 400)
         
     def test_success_get_all_authors(self):
