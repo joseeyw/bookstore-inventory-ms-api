@@ -62,7 +62,7 @@ python3 manage.py runserver
 ```
 #### Access the API documentation on 
 ```
-http://localhost:8080/swagger-ui/
+http://localhost:8000/swagger
 ```
 ### 3.Running tests
 ```
